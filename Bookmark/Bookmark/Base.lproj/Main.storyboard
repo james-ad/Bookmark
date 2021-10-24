@@ -36,6 +36,7 @@
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                     </view>
                     <connections>
+                        <outlet property="bookmarkedQuote" destination="pEI-bE-O8Z" id="M33-Ek-Jnn"/>
                         <outlet property="captureButton" destination="UPy-R3-yZz" id="F9h-EF-o2i"/>
                         <outlet property="view" destination="pEI-bE-O8Z" id="ffk-om-zw0"/>
                     </connections>
