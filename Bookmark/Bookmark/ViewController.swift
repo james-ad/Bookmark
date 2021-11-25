@@ -8,48 +8,27 @@
 import UIKit
 import AVFoundation
 
-class ViewController: UIViewController {
+class ViewController: UIViewController, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
+//    First, make your view controller conform to both UINavigationControllerDelegate, and UIImagePickerControllerDelegate.
     
     @IBOutlet var captureButton: UIButton!
     @IBOutlet var bookmarkedQuote: UITextView!
-    private var captureSession: AVCaptureSession!
-    private var previewView: PreviewView!
+    let imagePickerVC = UIImagePickerController()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         captureButton.sizeToFit()
     }
     
-    @IBAction private func takePhoto() {
-        confirmPermissionToAccessCamera()
-        guard AVCaptureDevice.authorizationStatus(for: .video) == .authorized else { return }
-        print("Button tapped")
-        captureSession.beginConfiguration()
-        // Setup camera input
-        guard
-            let photoDevice = AVCaptureDevice.default(.builtInDualCamera, for: .video, position: .back),
-            let photoDeviceInput = try? AVCaptureDeviceInput(device: photoDevice),
-            captureSession.canAddInput(photoDeviceInput)
-        else { return }
-        captureSession.addInput(photoDeviceInput)
-        
-        // Setup camera output
-        let photoOutput = AVCapturePhotoOutput()
-        guard captureSession.canAddOutput(photoOutput) else { return }
-        captureSession.sessionPreset = .photo
-        captureSession.addOutput(photoOutput)
-        captureSession.commitConfiguration()
-    }
-    
     private func confirmPermissionToAccessCamera() {
         switch AVCaptureDevice.authorizationStatus(for: .video) {
             case .authorized: // The user has previously granted access to the camera.
-                self.setupCaptureSession()
+            return
             
             case .notDetermined: // The user has not yet been asked for camera access.
                 AVCaptureDevice.requestAccess(for: .video) { granted in
                     if granted {
-                        self.setupCaptureSession()
+                        return
                     }
                 }
             
@@ -63,10 +42,24 @@ class ViewController: UIViewController {
         }
     }
     
-    private func setupCaptureSession() {
-        captureSession = AVCaptureSession()
-        previewView = PreviewView()
-        previewView.videoPreviewLayer.session = captureSession
+    @IBAction private func takePhoto() {
+        confirmPermissionToAccessCamera()
+        guard AVCaptureDevice.authorizationStatus(for: .video) == .authorized else { return }
+        imagePickerVC.sourceType = .camera
+        imagePickerVC.allowsEditing = true
+        imagePickerVC.delegate = self
+        present(imagePickerVC, animated: true)
+    }
+    
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+        picker.dismiss(animated: true)
+
+        guard let image = info[.editedImage] as? UIImage else {
+            print("No image found")
+            return
+        }
+        // print out the image size as a test
+        print(image.size)
     }
 }
 
